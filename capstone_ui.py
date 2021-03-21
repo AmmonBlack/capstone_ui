@@ -4,13 +4,13 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 import numpy as np
-import mod_press_test1 as mpt
+#import mod_press_test1 as mpt
 
 class Pressure_Test_UI:
     def  __init__(self):
-        self._small_text_size = '14'
-        self._large_text_size = '20'
-        self._font = 'Times  '
+        self._small_text_size = 14
+        self._large_text_size = 20
+        self._font = 'Times '
         self._default_element_size = (30,1)
         self._units = 'us'
 
@@ -38,7 +38,7 @@ class Pressure_Test_UI:
             self._display_TempTime_plt = tmp._display_TempTime_plt
             self._plot_update_rate = tmp._plot_update_rate
             self._test_duration = tmp._test_duration
-        except FileExistsError:
+        except FileNotFoundError:
             print("No saved file found")
 
         self.timer_layout = None
@@ -68,38 +68,42 @@ class Pressure_Test_UI:
         window.write_event_value('-THREAD-', 'done.')
         return plt.gcf()
 
-    def draw_figure(self, canvas, figure, loc=(0, 0)):
+    def __draw_figure(self, canvas, figure, loc=(0, 0)):
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
         figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
         return figure_canvas_agg
 
 
-    def delete_fig_agg(self, fig_agg):
+    def __delete_fig_agg(self, fig_agg):
         fig_agg.get_tk_widget().forget()
         plt.close('all')
 
-    def make_plot_layout(self):
+    def make_plot_layout(self, plot_type='Pressure vs Time'):
         # define the window layout
-        plot_layout = [[sg.Button('update'), sg.Button('Stop', key="-STOP-"), sg.Button('Exit', key="-EXIT-")],
-                  [sg.Radio('Keep looping', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop looping', "RADIO1", size=(12,3), key='-NOLOOP-')],
-                  [sg.Text('Plot test', font='Any 18')],
+        plot_layout = [ # [sg.Button('update'), sg.Button('Stop', key="-STOP-"), sg.Button('Exit', key="-EXIT-")],
+                  [sg.Radio('Continue Updating', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop Updating', "RADIO1", size=(12,3), key='-NOLOOP-')],
+                  [sg.Text(plot_type, font=self._font+str(self._large_text_size))],
                   [sg.Canvas(size=(500,500), key='canvas')]]
 
         # create the form and show it without the plot
-        plot_window = sg.Window('Demo Application - Embedding Matplotlib In PySimpleGUI',
-                           plot_layout, finalize=True)
+        # plot_window = sg.Window('Demo Application - Embedding Matplotlib In PySimpleGUI',
+        #                   plot_layout, finalize=True)
 
         return plot_layout
 
     def make_timer_layout(self):
-        timer_layout = [[sg.Text('', size=(8,2), font=('Helvetica 20'), justification='center', key='time')]
-                        [sg.Button('Reset'), sg.Exit()]]
+        timer_layout = [[sg.Text('', size=(8,2), font=self._font+ str(self._large_text_size, background_color='black'), justification='center', key='time')],
+                        [sg.Button('Reset')]]
 
-        timer_window = sg.Window('Running Timer', timer_layout)
+        # timer_window = sg.Window('Running Timer', timer_layout)
         return timer_layout
 
-    def __plot_checker(self, window, event, values, fig_agg):
+    def make_text_element(self):
+        text_element = [[sg.Text('Test is Running', size(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
+                        ]
+
+    def _plot_checker(self, window, event, values, fig_agg):
         if event == "update":
             if fig_agg is not None:
                     self.delete_fig_agg(fig_agg)
@@ -111,25 +115,28 @@ class Pressure_Test_UI:
             print('Acquisition: ', values[event])
             if values['-LOOP-'] == True:
                 if fig_agg is not None:
-                    self.delete_fig_agg(fig_agg)
+                    self.__delete_fig_agg(fig_agg)
                 fig = self.fig_maker(window, num)
                 num+=1
-                fig_agg = self.draw_figure(window['canvas'].TKCanvas, fig)
+                fig_agg = self.__draw_figure(window['canvas'].TKCanvas, fig)
                 window.Refresh()
 
         if event == "-STOP-":
             test_window['-NOLOOP-'].update(True)
 
-    def __timer_checker(self, window, event, values, current_time):
+    def _timer_checker(self, window, event, values, current_time):
         # --------- Do Button Operations --------
-        """
         if event is 'Reset':
             start_time = int(round(time.time() * 100))
             current_time = 0
             paused_time = start_time
-        """
+
         # --------- Display timer in window --------
-        window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100))
+        window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100), font=self._font+ str(self._large_text_size, background_color='black'))
+
+    def _text_updater(self, text, text_color, background_color):
+        # --------- Display timer in window --------
+        window['text output'].update(text, background_color=background_color, text_color=text_color)
 
     def run_test_window(self):
         # Calibrate labjack
@@ -137,9 +144,9 @@ class Pressure_Test_UI:
 
         # Check the true and Falses (NOT IMPLEMENTED) # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
-        test_layout.append(self.make_plot_layout())
+        test_layout.extend(self.make_plot_layout())
 
-        test_window = sg.Window("Test Window", test_layout, finalize=True)
+        test_window = sg.Window("Test Window", test_layout, alpha_channel=0.5, finalize=True)
 
         start_time = int(round(time.time() * 100))
         last_time = start_time
@@ -273,7 +280,7 @@ class Pressure_Test_UI:
             print('Button = ',event)
             # Process menu choices
             if event== 'About...':
-                sg.popup('Aboutthis program','Version 1.0', 'PysimpleGUI rocks...')
+                sg.popup('About this program','Version 1.0', 'PysimpleGUI rocks...')
             elif event== 'Open':
                 filename= sg.popup_get_file('file to open', no_window=True)
                 print(filename)
