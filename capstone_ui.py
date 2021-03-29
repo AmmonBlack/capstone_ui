@@ -240,7 +240,7 @@ class Pressure_Test_UI:
         # Will insert getAmbientAirConditions() here with try.
         try:
             mpt.getAmbientAirConditions()
-        else:
+        except:
             while True:
                 layout_atm_input = [[sg.Text('Please enter the atmospheric pressure in kPa')],
                          [sg.InputText()],
