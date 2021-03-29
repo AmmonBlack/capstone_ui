@@ -137,7 +137,7 @@ class Pressure_Test_UI:
         # --------- Display timer in window --------
         window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100), font=self._font+ str(self._large_text_size), background_color='black')
 
-    def _text_updater(self, text, text_color='white', background_color='green'):
+    def _text_updater(self, window, text, text_color='white', background_color='green'):
         # --------- Display timer in window --------
         window['text output'].update(text, background_color=background_color, text_color=text_color)
 
@@ -186,7 +186,7 @@ class Pressure_Test_UI:
 
                 pressure_psi_n = self._test_data['press_psi'][self._test_data['len']-1]
                 if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
-                    self._text_updater("No leak detected")
+                    self._text_updater(test_window, "No leak detected")
 
                     lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                     if lowPressure == True:
@@ -194,7 +194,7 @@ class Pressure_Test_UI:
                         break
 
                 elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
-                    self._text_updater("Possible leak detected", 'black', 'yellow')
+                    self._text_updater(test_window, "Possible leak detected", 'black', 'yellow')
                     print("A Possible Leak has been detected. "
                           "\nHowever, the pressure loss has not exceeded 0.1 psi. "
                           "\nThe leak is within limits.")
@@ -205,7 +205,7 @@ class Pressure_Test_UI:
                         break
 
                 elif leakTestResults == False:
-                    self._text_updater("FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
+                    self._text_updater(test_window, "FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
 
                     lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                     if lowPressure == True:
@@ -218,7 +218,7 @@ class Pressure_Test_UI:
                         break
 
                 else:
-                    self._text_updater("FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
+                    self._text_updater(test_window, "FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
                     print("Note: \nThe pressure has decreased more that 0.1 psi. "
                           "\nThe pressure decrease was likely due to decreasing temperatures. "
                           "\nContinue running the leak check until thermal equilibrium is achieved.")
