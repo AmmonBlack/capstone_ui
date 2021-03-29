@@ -281,18 +281,14 @@ class Pressure_Test_UI:
                     saveDestination = sg.popup_get_text("Enter file save name (don\'t include \'.xlsx\')")
                     mpt.writeToExcel(saveDestination, self._test_data['press_psi'], self._test_data['press_Pa'],self._test_data['temp_F'],
                                     self._test_data['temp_K'])
-
                 return
 
-
-            window_final_input.close()
+            elif event == sg.WIN_CLOSED or event == 'Exit':
+                return -1
 
             atm_input = values[0]
 
 
-
-            elif event == sg.WIN_CLOSED or event == 'Exit':
-                return -1
 
     def run(self):
 
