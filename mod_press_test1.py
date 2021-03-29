@@ -436,7 +436,7 @@ def timeKeeper(countTimePassed):
     return str(timeHr).rjust(2, '0') + ":" + str(timeMin_f).rjust(2, '0') + ":" + \
            str(timeSec_f).rjust(2, '0')
 
-def writeToExcel(pressureList_psi, pressureList_Pa, temperatureList_degrees_F, temperatureList_Kelvin,
+def writeToExcel(saveDestination, pressureList_psi, pressureList_Pa, temperatureList_degrees_F, temperatureList_Kelvin,
                  allowablePressureList_psi, allowablePressureList_Pa, countTimeList, ambientAirTemperature_F_List,
                  pressure_atm_Pa_List, meanPressure_psi, stdDev_Pressure_psi,  meanPressure_Pa, stdDev_Pressure_Pa,
                  meanAllowablePressure_psi, stdDev_AllowablePressure_psi, meanAllowablePressure_Pa,
@@ -446,7 +446,7 @@ def writeToExcel(pressureList_psi, pressureList_Pa, temperatureList_degrees_F, t
     # When called writes data contained in lists to an Excel Workbook
 
     # Create file workbook and worksheet to add temperature data to
-    Leak_Test_Results_Workbook = xlsxwriter.Workbook("Leak_Test_Results.xlsx")
+    Leak_Test_Results_Workbook = xlsxwriter.Workbook(saveDestination+".xlsx")
     Leak_Test_Results_Sheet = Leak_Test_Results_Workbook.add_worksheet()
 
     # Send titles to Excel file

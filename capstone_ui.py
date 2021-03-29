@@ -19,9 +19,11 @@ class Pressure_Test_UI:
         self._display_PTemp_plt = False
         self._display_leak_rate = True
         self._display_TempTime_plt =  False
-        self._plot_update_rate = 3
+        self._plot_update_rate = 2
         self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[],'len':0}
-        self._test_duration = 15*60
+        self._test_duration = 15*60*100 # We need to capture milliseconds
+        self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
+        self._pressure_low_bound = 18  # The lower bound of acceptable pressure
         try:
             tmp = self.load('saved_settings.pck')
 
@@ -135,7 +137,7 @@ class Pressure_Test_UI:
         # --------- Display timer in window --------
         window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100), font=self._font+ str(self._large_text_size), background_color='black')
 
-    def _text_updater(self, text, text_color, background_color):
+    def _text_updater(self, text, text_color='white', background_color='green'):
         # --------- Display timer in window --------
         window['text output'].update(text, background_color=background_color, text_color=text_color)
 
@@ -145,6 +147,7 @@ class Pressure_Test_UI:
 
         # Check the true and Falses (NOT IMPLEMENTED) # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
+        test_layout[0].extend(self.make_text_element()[0])
         test_layout.extend(self.make_plot_layout())
 
         test_window = sg.Window("Test Window", test_layout, finalize=True)
@@ -155,7 +158,7 @@ class Pressure_Test_UI:
         data = {}
         while True:
             # Handle window exiting
-            event, values = test_window.read()
+            event, values = test_window.read(timeout=10)
             if event is None:  # if user closes window
                 break
             if event == "-EXIT-":
@@ -182,14 +185,15 @@ class Pressure_Test_UI:
                         self._test_data['temp_K'][self._test_data['len']], pressure_atm_Pa)
 
                 if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
-                    print("A leak has NOT been detected.")
+                    self._text_updater("No leak detected")
 
-                    lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
+                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
                     if lowPressure == True:
                         sleep(1)
                         break
 
                 elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
+                    self._text_updater("Possible leak detected", 'black', 'yellow')
                     print("A Possible Leak has been detected. "
                           "\nHowever, the pressure loss has not exceeded 0.1 psi. "
                           "\nThe leak is within limits.")
@@ -200,10 +204,9 @@ class Pressure_Test_UI:
                         break
 
                 elif leakTestResults == False:
-                    print("!"*10 + " WARNING " + "!"*10 + "\nThe pressure has decreased more that 0.1 psi. "
-                          "\nA Possible leak has been detected. Troubleshoot as required.")
+                    self._text_updater("FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
 
-                    lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
+                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
                     if lowPressure == True:
                         sleep(1)
                         break
@@ -214,6 +217,7 @@ class Pressure_Test_UI:
                         break
 
                 else:
+                    self._text_updater("FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
                     print("Note: \nThe pressure has decreased more that 0.1 psi. "
                           "\nThe pressure decrease was likely due to decreasing temperatures. "
                           "\nContinue running the leak check until thermal equilibrium is achieved.")
@@ -253,6 +257,41 @@ class Pressure_Test_UI:
             if event == 'Submit':
                 return atm_input
             elif event  ==  'Cancel' or event == sg.WIN_CLOSED or event == 'Exit':
+                return -1
+
+    # This function will retrieve information at the end of the test it takes three booleans leak_detected, temp_related, and low_pressure
+    def final_window(self, leak_detected=False, temp_related=False):
+        # Will insert getAmbientAirConditions() here with try.
+        while True:
+            text=''
+            if leak_detected & temp_related:
+                text =  "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely due to a temperature change. Run again till equilibrium is achieved."
+            elif leak_detected:
+                text = "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely a real leak. Troubleshoot as necessary"
+            else:
+                text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi due to temperature. Repressurize and begin test again."
+            layout_atm_input = [[sg.Text(text)],
+                     [sg.Radio('Save data to Excel?', "RADIO1", default=False, key="-SAVE-")],
+                     [sg.Button('OK')]]
+            window_final_input = sg.Window('Test results', layout_atm_input)
+
+            event, values = window_atm_input.read()
+            if event == 'OK':
+                if event == "-SAVE-": # Currently unfinished need to make many more lists to contain excel data.
+                    saveDestination = sg.popup_get_text("Enter file save name (don\'t include \'.xlsx\')")
+                    mpt.writeToExcel(saveDestination, self._test_data['press_psi'], self._test_data['press_Pa'],self._test_data['temp_F'],
+                                    self._test_data['temp_K'])
+
+                return
+
+
+            window_final_input.close()
+
+            atm_input = values[0]
+
+
+
+            elif event == sg.WIN_CLOSED or event == 'Exit':
                 return -1
 
     def run(self):
