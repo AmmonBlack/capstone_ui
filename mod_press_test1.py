@@ -131,7 +131,7 @@ def text_run():
 
 # For use without loop control will return units according to 'us' or 'metric' defaults metric
 def  getTestData():
-    temperature_degrees_F, temperature_Kelvin = getSystemTemperature(d)
+    temperature_degrees_F, temperature_K = getSystemTemperature(d)
     pressure_psi, pressure_Pa = getPressure(d)
 
     return {'temp_F':temperature_degrees_F, 'press_psi':pressure_psi, 'temp_K':temperature_K, 'press_Pa':pressure_Pa}
