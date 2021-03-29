@@ -181,8 +181,8 @@ class Pressure_Test_UI:
                 # The following will run similar to leakTestControlLoop # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
                 leakTestResults, allowablePressure_Pa, allowablePressure_psi, change_in_pressure_psi = \
                     mpt.allowablePressureTest(self._test_data['press_Pa'][0], self._test_data['press_psi'][0],
-                        self._test_data['press_psi'][self._test_data['len']], self._test_data['temp_K'][0],
-                        self._test_data['temp_K'][self._test_data['len']], pressure_atm_Pa)
+                        self._test_data['press_psi'][self._test_data['len']-1], self._test_data['temp_K'][0],
+                        self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa)
 
                 if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
                     self._text_updater("No leak detected")
@@ -238,26 +238,29 @@ class Pressure_Test_UI:
     # This function will retrieve atmospheric data from the user
     def get_atmospheric_data_usr(self):
         # Will insert getAmbientAirConditions() here with try.
-        while True:
-            layout_atm_input = [[sg.Text('Please enter the atmospheric pressure in kPa')],
-                     [sg.InputText()],
-                     [sg.Submit(), sg.Cancel()]]
-            window_atm_input = sg.Window('Atmospheric Data', layout_atm_input)
+        try:
+            mpt.getAmbientAirConditions()
+        else:
+            while True:
+                layout_atm_input = [[sg.Text('Please enter the atmospheric pressure in kPa')],
+                         [sg.InputText()],
+                         [sg.Submit(), sg.Cancel()]]
+                window_atm_input = sg.Window('Atmospheric Data', layout_atm_input)
 
-            event, values = window_atm_input.read()
-            window_atm_input.close()
+                event, values = window_atm_input.read()
+                window_atm_input.close()
 
-            atm_input = values[0]
+                atm_input = values[0]
 
-            layout_confirmation_window = [[sg.Text('You entered: '+str(atm_input)+' kPa')],
-                                            [sg.Submit(), sg.Button('Re-Enter'),sg.Cancel()]]
-            confirmation_window= sg.Window('Confirm',  layout_confirmation_window)
-            event, values = confirmation_window.read()
-            confirmation_window.close()
-            if event == 'Submit':
-                return atm_input
-            elif event  ==  'Cancel' or event == sg.WIN_CLOSED or event == 'Exit':
-                return -1
+                layout_confirmation_window = [[sg.Text('You entered: '+str(atm_input)+' kPa')],
+                                                [sg.Submit(), sg.Button('Re-Enter'),sg.Cancel()]]
+                confirmation_window= sg.Window('Confirm',  layout_confirmation_window)
+                event, values = confirmation_window.read()
+                confirmation_window.close()
+                if event == 'Submit':
+                    return atm_input
+                elif event  ==  'Cancel' or event == sg.WIN_CLOSED or event == 'Exit':
+                    return -1
 
     # This function will retrieve information at the end of the test it takes three booleans leak_detected, temp_related, and low_pressure
     def final_window(self, leak_detected=False, temp_related=False):
