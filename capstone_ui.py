@@ -93,15 +93,16 @@ class Pressure_Test_UI:
         return plot_layout
 
     def make_timer_layout(self):
-        timer_layout = [[sg.Text('', size=(8,2), font=self._font+ str(self._large_text_size, background_color='black'), justification='center', key='time')],
+        timer_layout = [[sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='time')],
                         [sg.Button('Reset')]]
 
         # timer_window = sg.Window('Running Timer', timer_layout)
         return timer_layout
 
     def make_text_element(self):
-        text_element = [[sg.Text('Test is Running', size(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
+        text_element = [[sg.Text('Test is Running', size=(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
                         ]
+        return text_element
 
     def _plot_checker(self, window, event, values, fig_agg):
         if event == "update":
@@ -132,7 +133,7 @@ class Pressure_Test_UI:
             paused_time = start_time
 
         # --------- Display timer in window --------
-        window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100), font=self._font+ str(self._large_text_size, background_color='black'))
+        window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100), font=self._font+ str(self._large_text_size), background_color='black')
 
     def _text_updater(self, text, text_color, background_color):
         # --------- Display timer in window --------
@@ -146,7 +147,7 @@ class Pressure_Test_UI:
         test_layout = self.make_timer_layout()
         test_layout.extend(self.make_plot_layout())
 
-        test_window = sg.Window("Test Window", test_layout, alpha_channel=0.5, finalize=True)
+        test_window = sg.Window("Test Window", test_layout, finalize=True)
 
         start_time = int(round(time.time() * 100))
         last_time = start_time
