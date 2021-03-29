@@ -184,10 +184,11 @@ class Pressure_Test_UI:
                         self._test_data['press_psi'][self._test_data['len']-1], self._test_data['temp_K'][0],
                         self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa)
 
+                pressure_psi_n = self._test_data['press_psi'][self._test_data['len']-1]
                 if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
                     self._text_updater("No leak detected")
 
-                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
+                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                     if lowPressure == True:
                         sleep(1)
                         break
@@ -198,7 +199,7 @@ class Pressure_Test_UI:
                           "\nHowever, the pressure loss has not exceeded 0.1 psi. "
                           "\nThe leak is within limits.")
 
-                    lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
+                    lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                     if lowPressure == True:
                         sleep(1)
                         break
@@ -206,7 +207,7 @@ class Pressure_Test_UI:
                 elif leakTestResults == False:
                     self._text_updater("FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
 
-                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, pressureList_psi)
+                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                     if lowPressure == True:
                         sleep(1)
                         break
