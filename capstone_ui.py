@@ -168,7 +168,7 @@ class Pressure_Test_UI:
             if current_time < self._test_duration:
                 # Fill the test data stored in _test_data. If we want to make it better
                 #   we can add average of many samples
-                data = mpt.getTestData('us')
+                data = mpt.getTestData()
                 self._test_data['time'].append(current_time)
                 self._test_data['press_Pa'].append(data['press_Pa'])
                 self._test_data['temp_K'].append(data['temp_K'])
