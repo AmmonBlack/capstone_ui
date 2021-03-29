@@ -227,7 +227,7 @@ class Pressure_Test_UI:
                     break
 
                 # We can add if statements to run these for different layouts # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
-                self.__timer_checker(test_window, event, values, current_time)
+                self._timer_checker(test_window, event, values, current_time)
                 if current_time-last_time > self._plot_update_rate:
                     self.__plot_checker(test_window, event, values, fig_agg)
 
