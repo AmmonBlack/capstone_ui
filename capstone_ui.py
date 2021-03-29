@@ -4,7 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 import numpy as np
-#import mod_press_test1 as mpt
+import mod_press_test1 as mpt
 
 class Pressure_Test_UI:
     def  __init__(self):
@@ -127,7 +127,7 @@ class Pressure_Test_UI:
 
     def _timer_checker(self, window, event, values, current_time):
         # --------- Do Button Operations --------
-        if event is 'Reset':
+        if event == 'Reset':
             start_time = int(round(time.time() * 100))
             current_time = 0
             paused_time = start_time
