@@ -70,8 +70,8 @@ class Pressure_Test_UI:
             self.v = value
 
     def __plt_maker(self, window): # this should be called as a thread, then time.sleep() here would not freeze the GUI
-        #plt.plot(self._test_data['time'], self._test_data['press_psi'])
-        plt.scatter(np.random.rand(1,100), np.random.rand(1,100))
+        plt.plot(self._test_data['time'], self._test_data['press_psi'])
+        #plt.scatter(np.random.rand(1,100), np.random.rand(1,100))
         window.write_event_value('-THREAD-', 'done.')
         return plt.gcf()
 
