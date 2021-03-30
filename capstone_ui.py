@@ -145,7 +145,7 @@ class Pressure_Test_UI:
         # Calibrate labjack
         mpt.calibrate()
 
-        # Check the true and Falses (NOT IMPLEMENTED) # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
+        # Check the true and Falses (NOT IMPLEMENTED) # This could be implemented <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
         test_layout[0].extend(self.make_text_element()[0])
         test_layout.extend(self.make_plot_layout())
@@ -153,8 +153,9 @@ class Pressure_Test_UI:
         test_window = sg.Window("Test Window", test_layout, finalize=True)
 
         start_time = int(round(time.time() * 100))
-        last_time = start_time
+
         fig_agg = None
+        update_plot = True # Used in the logic for deciding when to  update plot.
         data = {}
         while True:
             # Handle window exiting
@@ -228,8 +229,13 @@ class Pressure_Test_UI:
 
                 # We can add if statements to run these for different layouts # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
                 self._timer_checker(test_window, event, values, current_time)
-                if current_time-last_time > self._plot_update_rate:
+
+                if (current_time // 100) % self._plot_update_rate == 0 & update_plot:
                     self._plot_checker(test_window, event, values, fig_agg)
+                    update_plot=False
+
+                if !update_plot & (current_time // 100) % self._plot_update_rate != 0:
+                    update_plot = True
 
             last_time = current_time
             continue
