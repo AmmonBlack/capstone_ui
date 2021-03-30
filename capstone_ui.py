@@ -234,7 +234,7 @@ class Pressure_Test_UI:
                     self._plot_checker(test_window, event, values, fig_agg)
                     update_plot=False
 
-                if !update_plot & (current_time // 100) % self._plot_update_rate != 0:
+                if not update_plot & (current_time // 100) % self._plot_update_rate != 0:
                     update_plot = True
 
             last_time = current_time
