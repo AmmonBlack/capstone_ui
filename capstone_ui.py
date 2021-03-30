@@ -4,7 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 import numpy as np
-import mod_press_test1 as mpt
+#import mod_press_test1 as mpt
 
 class Pressure_Test_UI:
     def  __init__(self):
@@ -65,8 +65,13 @@ class Pressure_Test_UI:
 
     # These functions will produce an updating matplotlib window
 
-    def plt_maker(self, window): # this should be called as a thread, then time.sleep() here would not freeze the GUI
-        plt.plot(self._test_data['time'], self._test_data['press_psi'])
+    class PBR:
+        def __init__(self, value):
+            self.v = value
+
+    def __plt_maker(self, window): # this should be called as a thread, then time.sleep() here would not freeze the GUI
+        #plt.plot(self._test_data['time'], self._test_data['press_psi'])
+        plt.scatter(np.random.rand(1,100), np.random.rand(1,100))
         window.write_event_value('-THREAD-', 'done.')
         return plt.gcf()
 
@@ -78,7 +83,7 @@ class Pressure_Test_UI:
 
 
     def __delete_fig_agg(self, fig_agg):
-        fig_agg.get_tk_widget().forget()
+        fig_agg.v.get_tk_widget().forget()
         plt.close('all')
 
     def make_plot_layout(self, plot_type='Pressure vs Time'):
@@ -107,25 +112,26 @@ class Pressure_Test_UI:
         return text_element
 
     def _plot_checker(self, window, event, values, fig_agg):
+
+        if values['-NOLOOP-'] == False:
+            window.write_event_value('-THREAD-', 'done.')
+            
         if event == "update":
-            if fig_agg is not None:
-                    self.delete_fig_agg(fig_agg)
-            fig = self.plt_maker(window)
-            num+=1
-            fig_agg = self.draw_figure(window['canvas'].TKCanvas, fig)
+            if fig_agg.v is not None:
+                    self.__delete_fig_agg(fig_agg)
+            fig = self.__plt_maker(window)
+            fig_agg.v = self.draw_figure(window['canvas'].TKCanvas, fig)
+
 
         if event == "-THREAD-":
-            print('Acquisition: ', values[event])
             if values['-LOOP-'] == True:
-                if fig_agg is not None:
+                if fig_agg.v is not None:
                     self.__delete_fig_agg(fig_agg)
-                fig = self.fig_maker(window, num)
-                num+=1
-                fig_agg = self.__draw_figure(window['canvas'].TKCanvas, fig)
+                fig = self.__plt_maker(window)
+                fig_agg.v = self.__draw_figure(window['canvas'].TKCanvas, fig)
                 window.Refresh()
 
-        if event == "-STOP-":
-            test_window['-NOLOOP-'].update(True)
+
 
     def _timer_checker(self, window, event, values, current_time):
         # --------- Do Button Operations --------
@@ -154,7 +160,7 @@ class Pressure_Test_UI:
 
         start_time = int(round(time.time() * 100))
 
-        fig_agg = None
+        fig_agg = self.PBR(None) # My work around class for pass by refrence
         update_plot = True # Used in the logic for deciding when to  update plot.
         data = {}
         while True:
