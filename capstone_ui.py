@@ -20,10 +20,11 @@ class Pressure_Test_UI:
         self._display_leak_rate = True
         self._display_TempTime_plt =  False
         self._plot_update_rate = 2
-        self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[],'len':0}
+        self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0}
         self._test_duration = 15*60*100 # We need to capture milliseconds
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
+        self._delta_time = 1
         try:
             tmp = self.load('saved_settings.pck')
 
@@ -151,6 +152,66 @@ class Pressure_Test_UI:
         # Calibrate labjack
         mpt.calibrate()
 
+        # This is a helper function meant to simplify the code below it contains most of the work loop logic
+        def handle_data(self, test_window):
+            data = mpt.getTestData()
+            self._test_data['time'].append(current_time)
+            self._test_data['press_Pa'].append(data['press_Pa'])
+            self._test_data['temp_K'].append(data['temp_K'])
+            self._test_data['press_psi'].append(data['press_psi'])
+            self._test_data['temp_F'].append(data['temp_F'])
+            self._test_data['len']+=1
+
+            pressure_atm_Pa, ambientAirTemperature_F = mpt.getAmbientAirConditions()
+
+            # The following will run similar to leakTestControlLoop # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
+            leakTestResults, allowablePressure_Pa, allowablePressure_psi, change_in_pressure_psi = \
+                mpt.allowablePressureTest(self._test_data['press_Pa'][0], self._test_data['press_psi'][0],
+                    self._test_data['press_psi'][self._test_data['len']-1], self._test_data['temp_K'][0],
+                    self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa)
+
+            pressure_psi_n = self._test_data['press_psi'][self._test_data['len']-1]
+            if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
+                self._text_updater(test_window, "No leak detected")
+
+                lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
+                if lowPressure == True:
+                    sleep(1)
+                    break
+
+            elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
+                self._text_updater(test_window, "Possible leak detected", 'black', 'yellow')
+                print("A Possible Leak has been detected. "
+                      "\nHowever, the pressure loss has not exceeded 0.1 psi. "
+                      "\nThe leak is within limits.")
+
+                lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
+                if lowPressure == True:
+                    sleep(1)
+                    break
+
+            elif leakTestResults == False:
+                self._text_updater(test_window, "FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
+
+                lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
+                if lowPressure == True:
+                    sleep(1)
+                    break
+
+                else:
+                    mpt.beepSound(frequency=500, duration=600, numberOfBeeps=10)
+                    sleep(1)
+                    break
+
+            else:
+                self._text_updater(test_window, "FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
+                print("Note: \nThe pressure has decreased more that 0.1 psi. "
+                      "\nThe pressure decrease was likely due to decreasing temperatures. "
+                      "\nContinue running the leak check until thermal equilibrium is achieved.")
+                beepSound(frequency=500, duration=600, numberOfBeeps=5)
+                sleep(1)
+                break
+
         # Check the true and Falses (NOT IMPLEMENTED) # This could be implemented <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
         test_layout[0].extend(self.make_text_element()[0])
@@ -161,7 +222,9 @@ class Pressure_Test_UI:
         start_time = int(round(time.time() * 100))
 
         fig_agg = self.PBR(None) # My work around class for pass by refrence
-        update_plot = True # Used in the logic for deciding when to  update plot.
+        # Used in the logic for deciding when to  update plot and collect data
+        update_plot = True
+        collect_data  = True
         data = {}
         while True:
             # Handle window exiting
@@ -172,76 +235,47 @@ class Pressure_Test_UI:
                 break
 
             current_time = int(round(time.time() * 100)) - start_time
+
+
+            # Start logic to collect data and run window This is where all of the other functions are called
             if current_time < self._test_duration:
                 # Fill the test data stored in _test_data. If we want to make it better
                 #   we can add average of many samples
-                data = mpt.getTestData()
-                self._test_data['time'].append(current_time)
-                self._test_data['press_Pa'].append(data['press_Pa'])
-                self._test_data['temp_K'].append(data['temp_K'])
-                self._test_data['press_psi'].append(data['press_psi'])
-                self._test_data['temp_F'].append(data['temp_F'])
-                self._test_data['len']+=1
 
-                pressure_atm_Pa, ambientAirTemperature_F = mpt.getAmbientAirConditions()
+                # Only collect data according to self._delta_time interval
+                if self._delta_time != 1:
+                    if (current_time // 100) % self._delta_time == 0 & collect_data:
+                        handle_data(self, test_window)
+                        collect_data = False
 
-                # The following will run similar to leakTestControlLoop # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
-                leakTestResults, allowablePressure_Pa, allowablePressure_psi, change_in_pressure_psi = \
-                    mpt.allowablePressureTest(self._test_data['press_Pa'][0], self._test_data['press_psi'][0],
-                        self._test_data['press_psi'][self._test_data['len']-1], self._test_data['temp_K'][0],
-                        self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa)
-
-                pressure_psi_n = self._test_data['press_psi'][self._test_data['len']-1]
-                if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
-                    self._text_updater(test_window, "No leak detected")
-
-                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
-                    if lowPressure == True:
-                        sleep(1)
-                        break
-
-                elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
-                    self._text_updater(test_window, "Possible leak detected", 'black', 'yellow')
-                    print("A Possible Leak has been detected. "
-                          "\nHowever, the pressure loss has not exceeded 0.1 psi. "
-                          "\nThe leak is within limits.")
-
-                    lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
-                    if lowPressure == True:
-                        sleep(1)
-                        break
-
-                elif leakTestResults == False:
-                    self._text_updater(test_window, "FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
-
-                    lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
-                    if lowPressure == True:
-                        sleep(1)
-                        break
-
-                    else:
-                        mpt.beepSound(frequency=500, duration=600, numberOfBeeps=10)
-                        sleep(1)
-                        break
-
+                    if not collect_data & (current_time // 100) % self._delta_time != 0:
+                        collect_data = True
                 else:
-                    self._text_updater(test_window, "FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
-                    print("Note: \nThe pressure has decreased more that 0.1 psi. "
-                          "\nThe pressure decrease was likely due to decreasing temperatures. "
-                          "\nContinue running the leak check until thermal equilibrium is achieved.")
-                    beepSound(frequency=500, duration=600, numberOfBeeps=5)
-                    sleep(1)
-                    break
+                    if (current_time % 100) < 50 & collect_data:
+                        handle_data(self, test_window)
+                        collect_data = False
+
+                    if not collect_data & (current_time % 100) > 50:
+                        collect_data = True
 
                 # We can add if statements to run these for different layouts # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
                 self._timer_checker(test_window, event, values, current_time)
 
-                if (current_time // 100) % self._plot_update_rate == 0 & update_plot:
-                    self._plot_checker(test_window, event, values, fig_agg)
-                    update_plot=False
+                # Only update plot with accordance to self._plot_update_rate
+                if self._plot_update_rate != 1:
+                    if (current_time // 100) % self._plot_update_rate == 0 & update_plot:
+                        self._plot_checker(test_window, event, values, fig_agg)
+                        update_plot=False
 
-                if not update_plot & (current_time // 100) % self._plot_update_rate != 0:
-                    update_plot = True
+                    if not update_plot & (current_time // 100) % self._plot_update_rate != 0:
+                        update_plot = True
+                else:
+                    if (current_time % 100) < 50 & update_plot:
+                        self._plot_checker(test_window, event, values, fig_agg)
+                        update_plot=False
+                    if not update_plot & (current_time % 100) > 50:
+                        update_plot = True
+
 
             last_time = current_time
             continue
