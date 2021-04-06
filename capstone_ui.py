@@ -90,7 +90,7 @@ class Pressure_Test_UI:
     def make_plot_layout(self, plot_type='Pressure vs Time'):
         # define the window layout
         plot_layout = [ # [sg.Button('update'), sg.Button('Stop', key="-STOP-"), sg.Button('Exit', key="-EXIT-")],
-                  [sg.Radio('Continue Updating', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop Updating', "RADIO1", size=(12,3), key='-NOLOOP-')],
+                  [sg.Radio('Update Plot', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop Plot Update', "RADIO1", size=(12,3), key='-NOLOOP-')],
                   [sg.Text(plot_type, font=self._font+str(self._large_text_size))],
                   [sg.Canvas(size=(500,500), key='canvas')]]
 
@@ -177,7 +177,7 @@ class Pressure_Test_UI:
 
                 lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    sleep(1)
+                    #sleep(1)
                     #break
 
             elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
@@ -188,7 +188,7 @@ class Pressure_Test_UI:
 
                 lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    sleep(1)
+                    #sleep(1)
                     #break
 
             elif leakTestResults == False:
@@ -196,12 +196,12 @@ class Pressure_Test_UI:
 
                 lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    sleep(1)
+                    #sleep(1)
                     #break
 
                 else:
                     mpt.beepSound(frequency=500, duration=600, numberOfBeeps=10)
-                    sleep(1)
+                    #sleep(1)
                     #break
 
             else:
