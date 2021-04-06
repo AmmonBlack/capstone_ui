@@ -154,6 +154,7 @@ class Pressure_Test_UI:
 
         # This is a helper function meant to simplify the code below it contains most of the work loop logic
         def handle_data(self, test_window):
+            print("did it")
             data = mpt.getTestData()
             self._test_data['time'].append(current_time)
             self._test_data['press_Pa'].append(data['press_Pa'])
