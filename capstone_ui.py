@@ -19,7 +19,7 @@ class Pressure_Test_UI:
         self._display_PTemp_plt = False
         self._display_leak_rate = True
         self._display_TempTime_plt =  False
-        self._plot_update_rate = 2
+        self._plot_update_rate = 10
         self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0}
         self._test_duration = 15*60*100 # We need to capture milliseconds
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
