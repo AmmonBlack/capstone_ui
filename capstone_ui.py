@@ -7,7 +7,7 @@ import numpy as np
 import mod_press_test1 as mpt
 
 class Pressure_Test_UI:
-    def  __init__(self):
+    def __init__(self):
         self._small_text_size = 14
         self._large_text_size = 20
         self._font = 'Times '
