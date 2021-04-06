@@ -24,7 +24,7 @@ class Pressure_Test_UI:
         self._test_duration = 15*60*100 # We need to capture milliseconds
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
-        self._delta_time = 1
+        self._delta_time = 2
         try:
             tmp = self.load('saved_settings.pck')
 
