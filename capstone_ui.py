@@ -179,6 +179,7 @@ class Pressure_Test_UI:
                 if lowPressure == True:
                     #sleep(1)
                     #break
+                    continue
 
             elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
                 self._text_updater(test_window, "Possible leak detected", 'black', 'yellow')
@@ -190,6 +191,7 @@ class Pressure_Test_UI:
                 if lowPressure == True:
                     #sleep(1)
                     #break
+                    continue
 
             elif leakTestResults == False:
                 self._text_updater(test_window, "FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
@@ -198,11 +200,13 @@ class Pressure_Test_UI:
                 if lowPressure == True:
                     #sleep(1)
                     #break
+                    continue
 
                 else:
                     mpt.beepSound(frequency=500, duration=600, numberOfBeeps=10)
                     #sleep(1)
                     #break
+                    continue
 
             else:
                 self._text_updater(test_window, "FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
@@ -210,8 +214,9 @@ class Pressure_Test_UI:
                       "\nThe pressure decrease was likely due to decreasing temperatures. "
                       "\nContinue running the leak check until thermal equilibrium is achieved.")
                 beepSound(frequency=500, duration=600, numberOfBeeps=5)
-                sleep(1)
+                #sleep(1)
                 #break
+                continue
 
         # Check the true and Falses (NOT IMPLEMENTED) # This could be implemented <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
