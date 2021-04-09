@@ -354,7 +354,7 @@ class Pressure_Test_UI:
                                     np.mean(self._test_data['alPress_psi']), np.std(self._test_data['alPress_psi']),
                                     np.mean(self._test_data['alPress_Pa']), np.std(self._test_data['alPress_Pa']),
                                     np.mean(self._test_data['temp_K']), np.std(self._test_data['temp_K']),
-                                    np.mean(self._test_data['temp_F']), np.std(self._test_data['temp_F']), self._test_data['press_change_psi']
+                                    np.mean(self._test_data['temp_F']), np.std(self._test_data['temp_F']), self._test_data['press_change_psi'],
                                     np.mean(self._test_data['press_change_psi']), np.std(self._test_data['press_change_psi']),
                                     )
                 return
