@@ -265,7 +265,7 @@ class Pressure_Test_UI:
 
             pdb.set_trace()
             # Start logic to collect data and run window This is where all of the other functions are called
-            if current_time < self._test_duration & run_test:
+            if current_time < self._test_duration and run_test:
                 pdb.set_trace()
                 # Fill the test data stored in _test_data. If we want to make it better
                 #   we can add average of many samples
@@ -276,14 +276,14 @@ class Pressure_Test_UI:
                         run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
 
-                    if not collect_data & (current_time // 100) % self._delta_time != 0:
+                    if not collect_data and (current_time // 100) % self._delta_time != 0:
                         collect_data = True
                 else:
-                    if (current_time % 100) < 50 & collect_data:
+                    if (current_time % 100) < 50 and collect_data:
                         run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
 
-                    if not collect_data & (current_time % 100) > 50:
+                    if not collect_data and (current_time % 100) > 50:
                         collect_data = True
 
                 # We can add if statements to run these for different layouts # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
