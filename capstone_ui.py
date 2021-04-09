@@ -251,7 +251,7 @@ class Pressure_Test_UI:
         # The following variables are used after the test finishes
         run_test, leak_detected, temp_related, low_pressure = True, False, False, False
 
-        import import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         while True:
             # Handle window exiting
             event, values = test_window.read(timeout=10)
