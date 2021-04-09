@@ -23,7 +23,7 @@ class Pressure_Test_UI:
         self._plot_allowable_press = False
         self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0,
                 'alPress_psi':[], 'alPress_Pa':[], 'amb_T_F':[],'amb_P_Pa':[], 'press_change_psi':[]}
-        self._plot_data = {'time':[],  'pressure':[]} # The variables filled here by self.__plt_maker
+        self._plot_data = {'time':[],  'pressure':[], 'all_pressure':[]} # The variables filled here by self.__plt_maker
         self._test_duration = 15*60*100 # We need to capture milliseconds
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
@@ -81,8 +81,12 @@ class Pressure_Test_UI:
         #   We also change the time from milliseconds to seconds
         self._plot_data['time'].append(np.median(self._test_data['time'][ self._test_data['len']-number_to_reduce :: ])//100)
         self._plot_data['pressure'].append(np.mean(self._test_data['press_psi'][ self._test_data['len']-number_to_reduce :: ]))
-
-        plt.plot(self._plot_data['time'], self._plot_data['pressure'])
+        if self._plot_allowable_press:
+            self._plot_data['all_pressure'].append((np.mean(self._test_data['press_change_psi'][ self._test_data['len']-number_to_reduce :: ]))
+            plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'b')
+            plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'r')
+        else:
+            plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'b')
         window.write_event_value('-THREAD-', 'done.')
         return plt.gcf()
 
@@ -305,7 +309,7 @@ class Pressure_Test_UI:
 
 
             last_time = current_time
-            if not run_test:
+            if not run_test or current_time>self._test_duration:
                 self.final_window(leak_detected, temp_related, low_pressure)
                 break
             continue
@@ -357,7 +361,7 @@ class Pressure_Test_UI:
                      [sg.Button('OK')]]
             window_final_input = sg.Window('Test results', layout_atm_input)
 
-            event, values = window_atm_input.read()
+            event, values = window_final_input.read()
             if event == 'OK':
                 if event == "-SAVE-": # Currently unfinished need to make many more lists to contain excel data.
                     saveDestination = sg.popup_get_text("Enter file save name (don\'t include \'.xlsx\')")
