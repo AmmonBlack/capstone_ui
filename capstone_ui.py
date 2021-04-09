@@ -188,46 +188,49 @@ class Pressure_Test_UI:
             self._test_data['press_change_psi'].append(change_in_pressure_psi)
 
             pressure_psi_n = self._test_data['press_psi'][self._test_data['len']-1]
+
+            # THESE IF ELSE STATEMENTS ARE CONFUSSING AF<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
                 self._text_updater(test_window, "No leak detected")
 
                 lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    #sleep(1)
-                    #break
-                    print()
+                    return  False, False, False, True
+                return True, False, False, False
 
             elif leakTestResults == True and pressure_psi_n <= allowablePressure_psi:
                 self._text_updater(test_window, "Possible leak detected", 'black', 'yellow')
+                """
                 print("A Possible Leak has been detected. "
                       "\nHowever, the pressure loss has not exceeded 0.1 psi. "
                       "\nThe leak is within limits.")
-
+                """
                 lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    self.final_window()
-                    return -1
+                    return False, False, False, True
+                return True, False, True, False
 
             elif leakTestResults == False:
-                self._text_updater(test_window, "FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
+                self._text_updater(test_window, "FAIL\nDecreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
 
                 lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    self.final_window()
-                    return -1
+                    return False, False, False, True
 
                 else:
-                    mpt.beepSound(frequency=500, duration=600, numberOfBeeps=10)
+                    mpt.beepSound(frequency=500, duration=400, numberOfBeeps=1)
+                    return False, True, False, False
 
 
             else:
-                self._text_updater(test_window, "FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
+                self._text_updater(test_window, "FAIL\nVirtual", 'black', 'yellow')
+                """
                 print("Note: \nThe pressure has decreased more that 0.1 psi. "
                       "\nThe pressure decrease was likely due to decreasing temperatures. "
                       "\nContinue running the leak check until thermal equilibrium is achieved.")
-                beepSound(frequency=500, duration=600, numberOfBeeps=5)
-                self.final_window(True, True)
-                return -1
+                """
+                mpt.beepSound(frequency=500, duration=400, numberOfBeeps=1)
+                return False, True, True, False
 
         # Check the true and Falses (NOT IMPLEMENTED) # This could be implemented <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
@@ -243,6 +246,9 @@ class Pressure_Test_UI:
         update_plot = True
         collect_data  = True
         data = {}
+
+        # The following variables are used after the test finishes
+        run_test, leak_detected, temp_related, low_pressure = True, False, False, False
         while True:
             # Handle window exiting
             event, values = test_window.read(timeout=10)
@@ -254,22 +260,23 @@ class Pressure_Test_UI:
             current_time = int(round(time.time() * 100)) - start_time
 
 
+
             # Start logic to collect data and run window This is where all of the other functions are called
-            if current_time < self._test_duration:
+            if current_time < self._test_duration & run_test:
                 # Fill the test data stored in _test_data. If we want to make it better
                 #   we can add average of many samples
 
                 # Only collect data according to self._delta_time interval
                 if self._delta_time != 1:
                     if (current_time // 100) % self._delta_time == 0 & collect_data:
-                        handle_data(self, test_window)
+                        run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
 
                     if not collect_data & (current_time // 100) % self._delta_time != 0:
                         collect_data = True
                 else:
                     if (current_time % 100) < 50 & collect_data:
-                        handle_data(self, test_window)
+                        run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
 
                     if not collect_data & (current_time % 100) > 50:
@@ -295,6 +302,9 @@ class Pressure_Test_UI:
 
 
             last_time = current_time
+            if not run_test:
+                self.final_window(leak_detected, temp_related, low_pressure)
+                break
             continue
 
         window.close()
@@ -327,16 +337,18 @@ class Pressure_Test_UI:
                     return -1
 
     # This function will retrieve information at the end of the test it takes three booleans leak_detected, temp_related, and low_pressure
-    def final_window(self, leak_detected=False, temp_related=False):
+    def final_window(self, leak_detected=False, temp_related=False, low_pressure=False):
         # Will insert getAmbientAirConditions() here with try.
         while True:
             text=''
+            if low_pressure:
+                text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi. Repressurize and begin test again."
             if leak_detected & temp_related:
                 text =  "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely due to a temperature change. Run again till equilibrium is achieved."
             elif leak_detected:
                 text = "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely a real leak. Troubleshoot as necessary"
             else:
-                text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi. Repressurize and begin test again."
+                text =  "No leak detected"
             layout_atm_input = [[sg.Text(text)],
                      [sg.Radio('Save data to Excel?', "RADIO1", default=False, key="-SAVE-")],
                      [sg.Button('OK')]]

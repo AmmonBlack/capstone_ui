@@ -405,10 +405,10 @@ def allowablePressureTest(pressure_Pa_1, pressure_psi_1, pressure_psi_n, tempera
 
     allowablePressure_psi = allowablePressure_Pa / 6894.757
 
-    print("allowable Pressure =", round(allowablePressure_psi, 2), "psi")
+    #print("allowable Pressure =", round(allowablePressure_psi, 2), "psi")
 
     change_in_pressure_psi = round(pressure_psi_n - pressure_psi_1,2)
-    print("Change in pressure =", change_in_pressure_psi, "psi")
+    #print("Change in pressure =", change_in_pressure_psi, "psi")
 
     if change_in_pressure_psi <= -0.1:
         if pressure_psi_n >= allowablePressure_psi:
