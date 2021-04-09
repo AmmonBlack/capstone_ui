@@ -20,6 +20,7 @@ class Pressure_Test_UI:
         self._display_leak_rate = True
         self._display_TempTime_plt =  False
         self._plot_update_rate = 10
+        self._plot_allowable_press = False
         self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0,
                 'alPress_psi':[], 'alPress_Pa':[], 'amb_T_F':[],'amb_P_Pa':[], 'press_change_psi':[]}
         self._plot_data = {'time':[],  'pressure':[]} # The variables filled here by self.__plt_maker
@@ -249,6 +250,7 @@ class Pressure_Test_UI:
 
         # The following variables are used after the test finishes
         run_test, leak_detected, temp_related, low_pressure = True, False, False, False
+        print(run_test)
         while True:
             # Handle window exiting
             event, values = test_window.read(timeout=10)
@@ -260,7 +262,7 @@ class Pressure_Test_UI:
             current_time = int(round(time.time() * 100)) - start_time
 
 
-
+            print('Troubleshoot1')
             # Start logic to collect data and run window This is where all of the other functions are called
             if current_time < self._test_duration & run_test:
                 # Fill the test data stored in _test_data. If we want to make it better
