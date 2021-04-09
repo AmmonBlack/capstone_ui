@@ -251,7 +251,7 @@ class Pressure_Test_UI:
         # The following variables are used after the test finishes
         run_test, leak_detected, temp_related, low_pressure = True, False, False, False
 
-        import pdb; pdb.set_trace()
+
         while True:
             # Handle window exiting
             event, values = test_window.read(timeout=10)
@@ -263,10 +263,9 @@ class Pressure_Test_UI:
             current_time = int(round(time.time() * 100)) - start_time
 
 
-            pdb.set_trace()
             # Start logic to collect data and run window This is where all of the other functions are called
             if current_time < self._test_duration and run_test:
-                pdb.set_trace()
+
                 # Fill the test data stored in _test_data. If we want to make it better
                 #   we can add average of many samples
 
