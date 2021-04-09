@@ -20,7 +20,9 @@ class Pressure_Test_UI:
         self._display_leak_rate = True
         self._display_TempTime_plt =  False
         self._plot_update_rate = 10
-        self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0}
+        self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0,
+                'alPress_psi':[], 'alPress_Pa':[], 'amb_T_F':[],'amb_P_Pa':[], 'press_change_psi':[]}
+        self._plot_data = {'time':[],  'pressure':[]} # The variables filled here by self.__plt_maker
         self._test_duration = 15*60*100 # We need to capture milliseconds
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
@@ -71,8 +73,15 @@ class Pressure_Test_UI:
             self.v = value
 
     def __plt_maker(self, window): # this should be called as a thread, then time.sleep() here would not freeze the GUI
-        plt.plot(self._test_data['time'], self._test_data['press_psi'])
-        #plt.scatter(np.random.rand(1,100), np.random.rand(1,100))
+        # The _plot_update_rate should never be smaller than the _delta_time
+        number_to_reduce = self._plot_update_rate // self._delta_time
+
+        # We slice off the  number of points to reduce and attach them to the end of the _plot_data
+        #   We also change the time from milliseconds to seconds
+        self._plot_data['time'].append(np.median(self._test_data['time'][ self._test_data['len']-number_to_reduce :: ])//100)
+        self._plot_data['pressure'].append(np.mean(self._test_data['press_psi'][ self._test_data['len']-number_to_reduce :: ]))
+
+        plt.plot(self._plot_data['time'], self._plot_data['pressure'])
         window.write_event_value('-THREAD-', 'done.')
         return plt.gcf()
 
@@ -154,8 +163,9 @@ class Pressure_Test_UI:
 
         # This is a helper function meant to simplify the code below it contains most of the work loop logic
         def handle_data(self, test_window):
-            print("did it")
             data = mpt.getTestData()
+
+            # We want to update all of our lists in our data with the appropriate information
             self._test_data['time'].append(current_time)
             self._test_data['press_Pa'].append(data['press_Pa'])
             self._test_data['temp_K'].append(data['temp_K'])
@@ -164,12 +174,18 @@ class Pressure_Test_UI:
             self._test_data['len']+=1
 
             pressure_atm_Pa, ambientAirTemperature_F = mpt.getAmbientAirConditions()
+            self._test_data['amb_P_Pa'].append(pressure_atm_Pa)
+            self._test_data['amb_T_F'].append(ambientAirTemperature_F)
 
             # The following will run similar to leakTestControlLoop # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
             leakTestResults, allowablePressure_Pa, allowablePressure_psi, change_in_pressure_psi = \
                 mpt.allowablePressureTest(self._test_data['press_Pa'][0], self._test_data['press_psi'][0],
                     self._test_data['press_psi'][self._test_data['len']-1], self._test_data['temp_K'][0],
                     self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa)
+
+            self._test_data['alPress_Pa'].append(allowablePressure_Pa)
+            self._test_data['alPress_psi'].append(allowablePressure_psi)
+            self._test_data['press_change_psi'].append(change_in_pressure_psi)
 
             pressure_psi_n = self._test_data['press_psi'][self._test_data['len']-1]
             if leakTestResults == True and pressure_psi_n > allowablePressure_psi:
@@ -187,26 +203,22 @@ class Pressure_Test_UI:
                       "\nHowever, the pressure loss has not exceeded 0.1 psi. "
                       "\nThe leak is within limits.")
 
-                lowPressure = lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
+                lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    #sleep(1)
-                    #break
-                    print()
+                    self.final_window()
+                    return -1
 
             elif leakTestResults == False:
                 self._text_updater(test_window, "FAIL\nPressure decreased "+str(self._leak_tolerance_psi)+" psi", 'white', 'red')
 
                 lowPressure = mpt.lowPressureWarning(pressure_psi_n, allowablePressure_psi, self._test_data['press_psi'])
                 if lowPressure == True:
-                    #sleep(1)
-                    #break
-                    print()
+                    self.final_window()
+                    return -1
 
                 else:
                     mpt.beepSound(frequency=500, duration=600, numberOfBeeps=10)
-                    #sleep(1)
-                    #break
-                    print()
+
 
             else:
                 self._text_updater(test_window, "FAIL\nPressured likely decreased due to temperature change", 'black', 'yellow')
@@ -214,9 +226,8 @@ class Pressure_Test_UI:
                       "\nThe pressure decrease was likely due to decreasing temperatures. "
                       "\nContinue running the leak check until thermal equilibrium is achieved.")
                 beepSound(frequency=500, duration=600, numberOfBeeps=5)
-                #sleep(1)
-                #break
-                print()
+                self.final_window(True, True)
+                return -1
 
         # Check the true and Falses (NOT IMPLEMENTED) # This could be implemented <<<<<<<<<<<<<<<<<<<<<<<<<
         test_layout = self.make_timer_layout()
@@ -325,7 +336,7 @@ class Pressure_Test_UI:
             elif leak_detected:
                 text = "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely a real leak. Troubleshoot as necessary"
             else:
-                text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi due to temperature. Repressurize and begin test again."
+                text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi. Repressurize and begin test again."
             layout_atm_input = [[sg.Text(text)],
                      [sg.Radio('Save data to Excel?', "RADIO1", default=False, key="-SAVE-")],
                      [sg.Button('OK')]]
@@ -335,8 +346,17 @@ class Pressure_Test_UI:
             if event == 'OK':
                 if event == "-SAVE-": # Currently unfinished need to make many more lists to contain excel data.
                     saveDestination = sg.popup_get_text("Enter file save name (don\'t include \'.xlsx\')")
-                    mpt.writeToExcel(saveDestination, self._test_data['press_psi'], self._test_data['press_Pa'],self._test_data['temp_F'],
-                                    self._test_data['temp_K'])
+                    mpt.writeToExcel(saveDestination, self._test_data['press_psi'], self._test_data['press_Pa'], self._test_data['temp_F'],
+                                    self._test_data['temp_K'], self._test_data['alPress_psi'], self._test_data['alPress_Pa'], self._test_data['time'],
+                                    self._test_data['amb_T_F'], self._test_data['amb_P_Pa'],
+                                    np.mean(self._test_data['press_psi']), np.std(self._test_data['press_psi']),
+                                    np.mean(self._test_data['press_Pa']), np.std(self._test_data['press_Pa']),
+                                    np.mean(self._test_data['alPress_psi']), np.std(self._test_data['alPress_psi']),
+                                    np.mean(self._test_data['alPress_Pa']), np.std(self._test_data['alPress_Pa']),
+                                    np.mean(self._test_data['temp_K']), np.std(self._test_data['temp_K']),
+                                    np.mean(self._test_data['temp_F']), np.std(self._test_data['temp_F']), self._test_data['press_change_psi']
+                                    np.mean(self._test_data['press_change_psi']), np.std(self._test_data['press_change_psi']),
+                                    )
                 return
 
             elif event == sg.WIN_CLOSED or event == 'Exit':
