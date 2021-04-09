@@ -82,7 +82,7 @@ class Pressure_Test_UI:
         self._plot_data['time'].append(np.median(self._test_data['time'][ self._test_data['len']-number_to_reduce :: ])//100)
         self._plot_data['pressure'].append(np.mean(self._test_data['press_psi'][ self._test_data['len']-number_to_reduce :: ]))
         if self._plot_allowable_press:
-            self._plot_data['all_pressure'].append((np.mean(self._test_data['press_change_psi'][ self._test_data['len']-number_to_reduce :: ]))
+            self._plot_data['all_pressure'].append(np.mean(self._test_data['press_change_psi'][ self._test_data['len']-number_to_reduce :: ]))
             plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'b')
             plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'r')
         else:
