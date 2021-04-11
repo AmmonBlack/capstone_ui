@@ -275,7 +275,7 @@ class Pressure_Test_UI:
 
                 # Only collect data according to self._delta_time interval
                 if self._delta_time != 1:
-                    if (current_time // 100) % self._delta_time == 0 & collect_data:
+                    if (current_time // 100) % self._delta_time == 0 and collect_data:
                         run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
 
@@ -294,17 +294,17 @@ class Pressure_Test_UI:
 
                 # Only update plot with accordance to self._plot_update_rate
                 if self._plot_update_rate != 1:
-                    if (current_time // 100) % self._plot_update_rate == 0 & update_plot:
+                    if (current_time // 100) % self._plot_update_rate == 0 and update_plot:
                         self._plot_checker(test_window, event, values, fig_agg)
                         update_plot=False
 
-                    if not update_plot & (current_time // 100) % self._plot_update_rate != 0:
+                    if not update_plot and (current_time // 100) % self._plot_update_rate != 0:
                         update_plot = True
                 else:
-                    if (current_time % 100) < 50 & update_plot:
+                    if (current_time % 100) < 50 and update_plot:
                         self._plot_checker(test_window, event, values, fig_agg)
                         update_plot=False
-                    if not update_plot & (current_time % 100) > 50:
+                    if not update_plot and (current_time % 100) > 50:
                         update_plot = True
 
 
@@ -314,7 +314,7 @@ class Pressure_Test_UI:
                 break
             continue
 
-        window.close()
+        test_window.close()
 
     # This function will retrieve atmospheric data from the user
     def get_atmospheric_data_usr(self):
@@ -350,7 +350,7 @@ class Pressure_Test_UI:
             text=''
             if low_pressure:
                 text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi. Repressurize and begin test again."
-            if leak_detected & temp_related:
+            if leak_detected and temp_related:
                 text =  "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely due to a temperature change. Run again till equilibrium is achieved."
             elif leak_detected:
                 text = "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely a real leak. Troubleshoot as necessary"
@@ -363,7 +363,7 @@ class Pressure_Test_UI:
 
             event, values = window_final_input.read()
             if event == 'OK':
-                if event == "-SAVE-": # Currently unfinished need to make many more lists to contain excel data.
+                if values["-SAVE-"]==True: # Currently unfinished need to make many more lists to contain excel data.
                     saveDestination = sg.popup_get_text("Enter file save name (don\'t include \'.xlsx\')")
                     mpt.writeToExcel(saveDestination, self._test_data['press_psi'], self._test_data['press_Pa'], self._test_data['temp_F'],
                                     self._test_data['temp_K'], self._test_data['alPress_psi'], self._test_data['alPress_Pa'], self._test_data['time'],
