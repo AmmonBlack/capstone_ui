@@ -4,11 +4,11 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 import numpy as np
-import mod_press_test1 as mpt
+#import mod_press_test1 as mpt
 
 class Pressure_Test_UI:
     def __init__(self):
-        self._small_text_size = 14
+        self._small_text_size = 12
         self._large_text_size = 20
         self._font = 'Times '
         self._default_element_size = (30,1)
@@ -115,16 +115,25 @@ class Pressure_Test_UI:
         return plot_layout
 
     def make_timer_layout(self):
-        timer_layout = [[sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='time')],
-                        [sg.Button('Reset')]]
+        timer_layout = [   [sg.Text('Time', size=(8,1), font=self._font+ str(self._small_text_size), justification='center')],
+                        [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='time')],
+                        [sg.Button('Reset')]
+                        ]
 
         # timer_window = sg.Window('Running Timer', timer_layout)
         return timer_layout
 
     def make_text_element(self):
-        text_element = [[sg.Text('Test is Running', size=(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
+        text_element = [[sg.Text('Status', size=(8,1), font=self._font+ str(self._small_text_size), justification='center') ],
+                        [sg.Text('Test is Running', size=(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
                         ]
         return text_element
+
+    def make_press_element(self):
+        press_element = [[sg.Text('Pressure', size=(8,1), font=self._font+ str(self._small_text_size), justification='center') ],
+                        [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='press')],
+                        ]
+        return press_element
 
     def _plot_checker(self, window, event, values, fig_agg):
 
@@ -149,14 +158,11 @@ class Pressure_Test_UI:
 
 
     def _timer_checker(self, window, event, values, current_time):
-        # --------- Do Button Operations --------
-        if event == 'Reset':
-            start_time = int(round(time.time() * 100))
-            current_time = 0
-            paused_time = start_time
-
         # --------- Display timer in window --------
         window['time'].update('{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100), font=self._font+ str(self._large_text_size), background_color='black')
+
+    def _pres_updater(self, window, event, values, press):
+        window['press'].update(str(press)+ " psi")
 
     def _text_updater(self, window, text, text_color='white', background_color='green'):
         # --------- Display timer in window --------
@@ -263,6 +269,9 @@ class Pressure_Test_UI:
                 break
             if event == "-EXIT-":
                 break
+            if event == 'Reset':
+                self._plot_data = {'time':[],  'pressure':[], 'all_pressure':[]}
+                start_time = int(round(time.time() * 100))
 
             current_time = int(round(time.time() * 100)) - start_time
 
@@ -278,6 +287,7 @@ class Pressure_Test_UI:
                     if (current_time // 100) % self._delta_time == 0 and collect_data:
                         run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
+                        self._pres_updater(test_window, event, values, self._test_data['pressure_psi'][self._test_data['len']-1])
 
                     if not collect_data and (current_time // 100) % self._delta_time != 0:
                         collect_data = True
@@ -311,7 +321,6 @@ class Pressure_Test_UI:
             last_time = current_time
             if not run_test or current_time>self._test_duration:
                 self.final_window(leak_detected, temp_related, low_pressure)
-                break
             continue
 
         test_window.close()
