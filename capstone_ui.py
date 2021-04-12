@@ -290,7 +290,7 @@ class Pressure_Test_UI:
                     if (current_time // 100) % self._delta_time == 0 and collect_data:
                         run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
-                        self._pres_updater(test_window, event, values, self._test_data['pressure_psi'][self._test_data['len']-1])
+                        self._pres_updater(test_window, event, values, self._test_data['press_psi'][self._test_data['len']-1])
 
                     if not collect_data and (current_time // 100) % self._delta_time != 0:
                         collect_data = True
