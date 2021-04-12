@@ -244,12 +244,12 @@ class Pressure_Test_UI:
                 return False, True, True, False
 
         # Check the true and Falses (NOT IMPLEMENTED) # This could be implemented <<<<<<<<<<<<<<<<<<<<<<<<<
-        test_layout = test.make_timer_layout()
-        test_layout[0].extend(test.make_text_element()[0])
-        test_layout[1].extend(test.make_text_element()[1])
-        test_layout[0].extend(test.make_press_element()[0])
-        test_layout[1].extend(test.make_press_element()[1])
-        test_layout.extend(test.make_plot_layout())
+        test_layout = self.make_timer_layout()
+        test_layout[0].extend(self.make_text_element()[0])
+        test_layout[1].extend(self.make_text_element()[1])
+        test_layout[0].extend(self.make_press_element()[0])
+        test_layout[1].extend(self.make_press_element()[1])
+        test_layout.extend(self.make_plot_layout())
 
         test_window = sg.Window("Test Window", test_layout, finalize=True)
 
