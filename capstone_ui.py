@@ -306,7 +306,7 @@ class Pressure_Test_UI:
                 # We can add if statements to run these for different layouts # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
                 self._timer_checker(test_window, event, values, current_time)
 
-                imort import pdb; pdb.set_trace()
+                import pdb; pdb.set_trace()
                 # Only update plot with accordance to self._plot_update_rate
                 if self._plot_update_rate != 1:
                     if (current_time // 100) % self._plot_update_rate == 0 and update_plot:
