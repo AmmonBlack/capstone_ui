@@ -115,7 +115,7 @@ class Pressure_Test_UI:
         return plot_layout
 
     def make_timer_layout(self):
-        timer_layout = [   [sg.Text('Time', size=(8,1), font=self._font+ str(self._small_text_size), justification='center')],
+        timer_layout = [   [sg.Text('Time', size=(8,2), font=self._font+ str(self._small_text_size), justification='center')],
                         [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='time')],
                         [sg.Button('Reset')]
                         ]
@@ -124,13 +124,13 @@ class Pressure_Test_UI:
         return timer_layout
 
     def make_text_element(self):
-        text_element = [[sg.Text('Status', size=(8,1), font=self._font+ str(self._small_text_size), justification='center') ],
+        text_element = [[sg.Text('Status', size=(8,2), font=self._font+ str(self._small_text_size), justification='center') ],
                         [sg.Text('Test is Running', size=(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
                         ]
         return text_element
 
     def make_press_element(self):
-        press_element = [[sg.Text('Pressure', size=(8,1), font=self._font+ str(self._small_text_size), justification='center') ],
+        press_element = [[sg.Text('Pressure', size=(8,2), font=self._font+ str(self._small_text_size), justification='center') ],
                         [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='press')],
                         ]
         return press_element
@@ -298,6 +298,7 @@ class Pressure_Test_UI:
                     if (current_time % 100) < 50 and collect_data:
                         run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
                         collect_data = False
+                        self._pres_updater(test_window, event, values, self._test_data['press_psi'][self._test_data['len']-1])
 
                     if not collect_data and (current_time % 100) > 50:
                         collect_data = True
