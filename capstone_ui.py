@@ -117,7 +117,7 @@ class Pressure_Test_UI:
     def make_timer_layout(self):
         timer_layout = [   [sg.Text('Time', size=(8,1), font=self._font+ str(self._small_text_size), justification='center')],
                         [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='time')],
-                        [sg.Button('Reset')]
+                        #[sg.Button('Reset')]
                         ]
 
         # timer_window = sg.Window('Running Timer', timer_layout)
@@ -272,10 +272,11 @@ class Pressure_Test_UI:
                 break
             if event == "-EXIT-":
                 break
+            """
             if event == 'Reset':
                 self._plot_data = {'time':[],  'pressure':[], 'all_pressure':[]}
                 start_time = int(round(time.time() * 100))
-
+            """
             current_time = int(round(time.time() * 100)) - start_time
 
 
