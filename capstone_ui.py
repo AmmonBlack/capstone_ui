@@ -169,6 +169,8 @@ class Pressure_Test_UI:
         # --------- Display timer in window --------
         window['text output'].update(text, background_color=background_color, text_color=text_color)
 
+    def __clean_plot_data(self):
+        self._plot_data = {'time':[],  'pressure':[], 'all_pressure':[]}
     def run_test_window(self):
         # Calibrate labjack
         mpt.calibrate()
@@ -271,8 +273,10 @@ class Pressure_Test_UI:
             # Handle window exiting
             event, values = test_window.read(timeout=10)
             if event is None:  # if user closes window
+                self.__clean_plot_data()
                 break
             if event == "-EXIT-":
+                self.__clean_plot_data()
                 break
             """
             if event == 'Reset':
