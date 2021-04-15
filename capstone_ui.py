@@ -382,6 +382,7 @@ class Pressure_Test_UI:
                      [sg.Radio('Save data to Excel?', "RADIO1", default=False, key="-SAVE-")],
                      [sg.Button('OK')]]
             window_final_input = sg.Window('Test results', layout_atm_input)
+            self.__clean_plot_data()
 
             event, values = window_final_input.read()
             if event == 'OK':
@@ -398,7 +399,7 @@ class Pressure_Test_UI:
                                     np.mean(self._test_data['temp_F']), np.std(self._test_data['temp_F']), self._test_data['press_change_psi'],
                                     np.mean(self._test_data['press_change_psi']), np.std(self._test_data['press_change_psi']),
                                     )
-                return
+                break
 
             elif event == sg.WIN_CLOSED or event == 'Exit':
                 return -1
