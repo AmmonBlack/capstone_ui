@@ -136,9 +136,10 @@ class Pressure_Test_UI:
         return press_element
 
     def _plot_checker(self, window, event, values, fig_agg):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if values['-NOLOOP-'] == False:
             window.write_event_value('-THREAD-', 'done.')
+            event=="-THREAD-"
 
         if event == "update":
             if fig_agg.v is not None:
