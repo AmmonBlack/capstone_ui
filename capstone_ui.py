@@ -4,7 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 import numpy as np
-import mod_press_test1 as mpt
+#import mod_press_test1 as mpt
 
 class Pressure_Test_UI:
     def __init__(self):
@@ -115,7 +115,7 @@ class Pressure_Test_UI:
         return plot_layout
 
     def make_timer_layout(self):
-        timer_layout = [   [sg.Text('Time', size=(8,1), font=self._font+ str(self._small_text_size), justification='center')],
+        timer_layout = [   [sg.Text('Time', size=(14,1), font=self._font+ str(self._small_text_size), justification='center')],
                         [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='time')],
                         #[sg.Button('Reset')]
                         ]
@@ -124,13 +124,13 @@ class Pressure_Test_UI:
         return timer_layout
 
     def make_text_element(self):
-        text_element = [[sg.Text('Status', size=(8,1), font=self._font+ str(self._small_text_size), justification='center') ],
-                        [sg.Text('Test is Running', size=(8,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
+        text_element = [[sg.Text('Status', size=(28,1), font=self._font+ str(self._small_text_size), justification='center') ],
+                        [sg.Text('Test is Running', size=(15,2), font=self._font+ str(self._large_text_size+4), justification='center', key='text output')]
                         ]
         return text_element
 
     def make_press_element(self):
-        press_element = [[sg.Text('Pressure', size=(8,1), font=self._font+ str(self._small_text_size), justification='center') ],
+        press_element = [[sg.Text('Pressure', size=(14,1), font=self._font+ str(self._small_text_size), justification='center') ],
                         [sg.Text('', size=(8,2), font=self._font+str(self._large_text_size), background_color='black', justification='center', key='press')],
                         ]
         return press_element
@@ -260,6 +260,7 @@ class Pressure_Test_UI:
         # Used in the logic for deciding when to  update plot and collect data
         update_plot = True
         collect_data  = True
+        final_window_propogate = False
         data = {}
 
         # The following variables are used after the test finishes
@@ -326,8 +327,9 @@ class Pressure_Test_UI:
 
 
             last_time = current_time
-            if not run_test or current_time>self._test_duration:
+            if (not run_test or current_time>self._test_duration) and not final_window_propogate:
                 self.final_window(leak_detected, temp_related, low_pressure)
+                final_window_propogate = True
             continue
 
         test_window.close()
