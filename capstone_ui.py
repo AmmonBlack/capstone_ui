@@ -406,13 +406,13 @@ class Pressure_Test_UI:
 
             atm_input = values[0]
 
-
+    def settings_window(self,):
+        continue
 
     def run(self):
 
         #Define the menu  elements
-        menu_def= [['File', ['Open', 'Save', 'Exit']],
-                    ['Help', 'About...'],]
+        menu_def= [['Help', 'About...'],]
 
         #Gui definition
         layout = [
