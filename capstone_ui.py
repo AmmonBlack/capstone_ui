@@ -12,18 +12,23 @@ class Pressure_Test_UI:
         self._large_text_size = 20
         self._font = 'Times '
         self._default_element_size = (30,1)
-        self._units = 'us'
 
         self._display_timer = True
         self._display_PTime_plt = True
-        self._display_PTemp_plt = False
         self._display_leak_rate = True
-        self._display_TempTime_plt =  False
         self._plot_update_rate = 10
         self._plot_allowable_press = False
+
+        # These following values are currently not utilized
+        self._display_PTemp_plt = False
+        self._display_TempTime_plt =  False
+        self._units = 'us'
+
+
         self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0,
                 'alPress_psi':[], 'alPress_Pa':[], 'amb_T_F':[],'amb_P_Pa':[], 'press_change_psi':[]}
         self._plot_data = {'time':[],  'pressure':[], 'all_pressure':[]} # The variables filled here by self.__plt_maker
+
         self._test_duration = 15*60*100 # We need to capture milliseconds
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
@@ -35,7 +40,6 @@ class Pressure_Test_UI:
             self._large_text_size = tmp._large_text_size
             self._font = tmp._font
             self._default_element_size = tmp._default_element_size
-            self._units = tmp._units
 
             self._display_timer = tmp._display_timer
             self._display_PTime_plt = tmp._display_PTime_plt
@@ -43,7 +47,12 @@ class Pressure_Test_UI:
             self._display_leak_rate = tmp._display_leak_rate
             self._display_TempTime_plt = tmp._display_TempTime_plt
             self._plot_update_rate = tmp._plot_update_rate
+            self._units = tmp._units
+
             self._test_duration = tmp._test_duration
+            self._leak_tolerance_psi = tmp._leak_tolerance_psi
+            self._pressure_low_bound = tmp._pressure_low_bound
+            self._delta_time = tmp._delta_time
         except FileNotFoundError:
             print("No saved file found")
 
@@ -406,9 +415,22 @@ class Pressure_Test_UI:
 
             atm_input = values[0]
 
-    def settings_window(self,):
-        
-        continue
+    def test_settings_window(self,):
+        settings_layout = [
+                            sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))
+                            sg.Frame(layout=[
+                            [sg.Text("Test duration (min): "+str(self._test_duration/60/100), font=self._font+str(self._small_text_size)),
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='TEST_DURATION')]
+                            [sg.Text("Max pressure drop (psi): "+str(self._leak_tolerance_psi), font=self._font+str(self._small_text_size)),
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='MAX_DROP')]
+                            [sg.Text("Minimum pressure (psi): "+str(self._pressure_low_bound), font=self._font+str(self._small_text_size)),
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='MIN_PRESS')]
+                            [sg.Text("Sampling rate (sec): "+str(self._delta_time), font=self._font+str(self._small_text_size)),
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='SAMP_RATE')]
+                            ], title='Testing variables', relief=sg.RELIEF_SUNKEN, tooltip="Change test settings here"
+                            )
+                        ]
+
 
     def run(self):
 
