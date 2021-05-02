@@ -180,6 +180,11 @@ class Pressure_Test_UI:
 
     def __clean_plot_data(self):
         self._plot_data = {'time':[],  'pressure':[], 'all_pressure':[]}
+
+    def __clean_test_data(self):
+        self._test_data = {'time':[], 'press_psi':[], 'press_Pa':[], 'temp_F':[], 'temp_K':[], 'len':0,
+                'alPress_psi':[], 'alPress_Pa':[], 'amb_T_F':[],'amb_P_Pa':[], 'press_change_psi':[]}
+
     def run_test_window(self):
         # Calibrate labjack
         mpt.calibrate()
@@ -417,8 +422,8 @@ class Pressure_Test_UI:
 
     def test_settings_window(self,):
         settings_layout = [
-                            sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))
-                            sg.Frame(layout=[
+                            [sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))],
+                            [sg.Frame(layout=[
                             [sg.Text("Test duration (min): "+str(self._test_duration/60/100), font=self._font+str(self._small_text_size)),
                                     sg.Button('Change', font=self._font+str(self._small_text_size), key='TEST_DURATION')]
                             [sg.Text("Max pressure drop (psi): "+str(self._leak_tolerance_psi), font=self._font+str(self._small_text_size)),
@@ -428,8 +433,60 @@ class Pressure_Test_UI:
                             [sg.Text("Sampling rate (sec): "+str(self._delta_time), font=self._font+str(self._small_text_size)),
                                     sg.Button('Change', font=self._font+str(self._small_text_size), key='SAMP_RATE')]
                             ], title='Testing variables', relief=sg.RELIEF_SUNKEN, tooltip="Change test settings here"
-                            )
+                            )],
+                            [sg.Button("Save",font=self._font+str(self._small_text_size, key='SAVE'))]
                         ]
+
+        test_settings_window = sg.Window("Test settings window", settings_layout)
+
+        while True:
+            event, values = test_settings_window.read()
+
+            if event=='TEST_DURATION':
+                change = sg.popup_get_text('Enter new value:')
+                try:
+                    self._test_duration = float(change)*60*100
+                    test_settings_window.update('TEST_DURATION')
+                except:
+                    sg.popup("Something went wrong\n Please try again")
+
+            if event=='MAX_DROP':
+                change = sg.popup_get_text('Enter new value:')
+                try:
+                    self._leak_tolerance_psi = float(change)
+                    test_settings_window.update('MAX_DROP')
+                except:
+                    sg.popup("Something went wrong\n Please try again")
+
+            if event=='MIN_PRESS':
+                change = sg.popup_get_text('Enter new value:')
+                try:
+                    self._pressure_low_bound = float(change)
+                    test_settings_window.update('MIN_PRESS')
+                except:
+                    sg.popup("Something went wrong\n Please try again")
+
+            if event=='SAMP_RATE':
+                change = sg.popup_get_text('Enter new value:')
+                try:
+                    self._delta_time = float(change)
+                    test_settings_window.update('SAMP_RATE')
+                except:
+                    sg.popup("Something went wrong\n Please try again")
+
+            if event=='SAVE':
+                try:
+                    self.save(self, 'settings_save.pck')
+                    sg.popup("Successfully saved")
+                except:
+                    sg.popup("Something went wrong\n Please try again")
+
+            if event== sg.WIN_CLOSED:
+                sg.popup("Note: the settings will not\nbe saved for future tests\nbut will function for this session")
+                break
+
+        test_settings_window.close()
+
 
 
     def run(self):
