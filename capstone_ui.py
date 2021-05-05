@@ -430,7 +430,7 @@ class Pressure_Test_UI:
 
         def ret_test_settings_window():
             settings_layout = [
-                                [sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))],
+                                [sg.Text("This window allows modification of hard coded values", font=self._font+str(self._small_text_size))],
                                 [sg.Frame(layout=[
                                 [sg.Text("Test duration (min): "+str(self._test_duration/60/100), font=self._font+str(self._small_text_size)),
                                         sg.Button('Change', font=self._font+str(self._small_text_size), key='TEST_DURATION')],
