@@ -109,7 +109,7 @@ class Pressure_Test_UI:
         # define the window layout
         plot_layout = [ # [sg.Button('update'), sg.Button('Stop', key="-STOP-"), sg.Button('Exit', key="-EXIT-")],
                   [sg.Radio('Update Plot', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop Plot Update', "RADIO1", size=(12,3), key='-NOLOOP-'),
-                    sg.Checkbox('Plot allowable pressure', size=(12,3), key='-PLOT_AP-', default=False)],
+                    sg.Checkbox('Plot allowable pressure', size=(15,3), key='-PLOT_AP-', default=False)],
                   [sg.Text(plot_type, font=self._font+str(self._large_text_size))],
                   [sg.Canvas(size=(500,500), key='canvas')]]
 
