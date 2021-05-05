@@ -428,7 +428,7 @@ class Pressure_Test_UI:
 
     def test_settings_window(self,):
 
-        def ret_test_settings_window(self,):
+        def ret_test_settings_window():
             settings_layout = [
                                 [sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))],
                                 [sg.Frame(layout=[
