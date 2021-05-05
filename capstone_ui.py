@@ -33,6 +33,7 @@ class Pressure_Test_UI:
         self._leak_tolerance_psi = 0.1  # The leak tolerance set by INL
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
         self._delta_time = 2
+        self._test_tolerance = 0.06
         try:
             tmp = self.load('settings_save.pck')
 
@@ -53,15 +54,9 @@ class Pressure_Test_UI:
             self._leak_tolerance_psi = tmp._leak_tolerance_psi
             self._pressure_low_bound = tmp._pressure_low_bound
             self._delta_time = tmp._delta_time
+            self._test_tolerance = self._test_tolerance
         except FileNotFoundError:
             print("No saved file found")
-
-        self.timer_layout = None
-        self.pTime_layout = None
-        self.pTemp_layout = None
-        self.leak_rate_layout = None
-        self.TempTime_layout = None
-        self.test_window = None
 
         sg.SetOptions(element_padding=(15,1))
 
@@ -90,7 +85,7 @@ class Pressure_Test_UI:
         #   We also change the time from milliseconds to seconds
         self._plot_data['time'].append(np.median(self._test_data['time'][ self._test_data['len']-number_to_reduce :: ])//100)
         self._plot_data['pressure'].append(np.mean(self._test_data['press_psi'][ self._test_data['len']-number_to_reduce :: ]))
-        if self._plot_allowable_press:
+        if self._plot_allowable_press or window['-PLOT_AP-']:
             self._plot_data['all_pressure'].append(np.mean(self._test_data['press_change_psi'][ self._test_data['len']-number_to_reduce :: ]))
             plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'b')
             plt.plot(self._plot_data['time'], self._plot_data['pressure'], 'r')
@@ -113,7 +108,8 @@ class Pressure_Test_UI:
     def make_plot_layout(self, plot_type='Pressure vs Time'):
         # define the window layout
         plot_layout = [ # [sg.Button('update'), sg.Button('Stop', key="-STOP-"), sg.Button('Exit', key="-EXIT-")],
-                  [sg.Radio('Update Plot', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop Plot Update', "RADIO1", size=(12,3), key='-NOLOOP-')],
+                  [sg.Radio('Update Plot', "RADIO1", default=True, size=(12,3),key="-LOOP-"),sg.Radio('Stop Plot Update', "RADIO1", size=(12,3), key='-NOLOOP-'),
+                    sg.Checkbox('Plot allowable pressure', size=(12,3), key='-PLOT_AP-', default=False)],
                   [sg.Text(plot_type, font=self._font+str(self._large_text_size))],
                   [sg.Canvas(size=(500,500), key='canvas')]]
 
@@ -215,7 +211,7 @@ class Pressure_Test_UI:
             leakTestResults, allowablePressure_Pa, allowablePressure_psi, change_in_pressure_psi = \
                 mpt.allowablePressureTest(self._test_data['press_Pa'][0], self._test_data['press_psi'][0],
                     self._test_data['press_psi'][self._test_data['len']-1], self._test_data['temp_K'][0],
-                    self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa)
+                    self._test_data['temp_K'][self._test_data['len']-1], pressure_atm_Pa, self._test_tolerance*6895)
 
             self._test_data['alPress_Pa'].append(allowablePressure_Pa)
             self._test_data['alPress_psi'].append(allowablePressure_psi)
