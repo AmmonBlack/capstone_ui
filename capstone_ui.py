@@ -416,12 +416,14 @@ class Pressure_Test_UI:
                                     np.mean(self._test_data['temp_F']), np.std(self._test_data['temp_F']), self._test_data['press_change_psi'],
                                     np.mean(self._test_data['press_change_psi']), np.std(self._test_data['press_change_psi']),
                                     )
+                window_final_input.close()
                 break
 
             elif event == sg.WIN_CLOSED or event == 'Exit':
                 return -1
 
             atm_input = values[0]
+
 
     def test_settings_window(self,):
         settings_layout = [
@@ -437,7 +439,7 @@ class Pressure_Test_UI:
                                     sg.Button('Change', font=self._font+str(self._small_text_size), key='SAMP_RATE')],
                             ], title='Testing variables', relief=sg.RELIEF_SUNKEN, tooltip="Change test settings here"
                             )],
-                            [sg.Button("Save",font=self._font+str(self._small_text_size, key='SAVE'))]
+                            [sg.Button("Save",font=self._font+str(self._small_text_size), key='SAVE')]
                         ]
 
         test_settings_window = sg.Window("Test settings window", settings_layout)
