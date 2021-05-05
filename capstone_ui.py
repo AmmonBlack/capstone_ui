@@ -388,7 +388,7 @@ class Pressure_Test_UI:
             text=''
             if low_pressure:
                 text = "Pressure dropped below the lower bound of "+str(self._pressure_low_bound)+" psi. Repressurize and begin test again."
-            if leak_detected and temp_related:
+            elif leak_detected and temp_related:
                 text =  "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely due to a temperature change. Run again till equilibrium is achieved."
             elif leak_detected:
                 text = "Pressure dropped more than "+str(self._leak_tolerance_psi)+" psi. This is likely a real leak. Troubleshoot as necessary"
