@@ -189,8 +189,11 @@ class Pressure_Test_UI:
         # Calibrate labjack
         mpt.calibrate()
 
+        # handles the getting atmospheric data if the usb dongle isn't plugged in
+        atm_input  = self.get_atmospheric_data_usr()
+
         # This is a helper function meant to simplify the code below it contains most of the work loop logic
-        def handle_data(self, test_window):
+        def handle_data(self, test_window, atm_input):
             data = mpt.getTestData()
 
             # We want to update all of our lists in our data with the appropriate information
@@ -201,9 +204,12 @@ class Pressure_Test_UI:
             self._test_data['temp_F'].append(data['temp_F'])
             self._test_data['len']+=1
 
-            pressure_atm_Pa, ambientAirTemperature_F = mpt.getAmbientAirConditions()
-            self._test_data['amb_P_Pa'].append(pressure_atm_Pa)
-            self._test_data['amb_T_F'].append(ambientAirTemperature_F)
+            if atm_input<0:
+                pressure_atm_Pa, ambientAirTemperature_F = mpt.getAmbientAirConditions()
+                self._test_data['amb_P_Pa'].append(pressure_atm_Pa)
+                self._test_data['amb_T_F'].append(ambientAirTemperature_F)
+            else:
+                self._test_data['amb_P_Pa'].append(atm_input*6895)# We must convert the pressure to pascal from psi
 
             # The following will run similar to leakTestControlLoop # This could be cleaned up <<<<<<<<<<<<<<<<<<<<<<<<<
             leakTestResults, allowablePressure_Pa, allowablePressure_psi, change_in_pressure_psi = \
@@ -311,7 +317,7 @@ class Pressure_Test_UI:
                 # Only collect data according to self._delta_time interval
                 if self._delta_time != 1:
                     if (current_time // 100) % self._delta_time == 0 and collect_data:
-                        run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
+                        run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window, atm_input)
                         collect_data = False
                         self._pres_updater(test_window, event, values, round(self._test_data['press_psi'][self._test_data['len']-1], 3))
 
@@ -319,7 +325,7 @@ class Pressure_Test_UI:
                         collect_data = True
                 else:
                     if (current_time % 100) < 50 and collect_data:
-                        run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window)
+                        run_test, leak_detected, temp_related, low_pressure = handle_data(self, test_window, atm_input)
                         collect_data = False
                         self._pres_updater(test_window, event, values, round(self._test_data['press_psi'][self._test_data['len']-1], 3))
 
@@ -359,9 +365,10 @@ class Pressure_Test_UI:
         # Will insert getAmbientAirConditions() here with try.
         try:
             mpt.getAmbientAirConditions()
+            return -1
         except:
             while True:
-                layout_atm_input = [[sg.Text('Please enter the atmospheric pressure in kPa')],
+                layout_atm_input = [[sg.Text('Please enter the absolute atmospheric pressure in psi')],
                          [sg.InputText()],
                          [sg.Submit(), sg.Cancel()]]
                 window_atm_input = sg.Window('Atmospheric Data', layout_atm_input)
@@ -371,7 +378,7 @@ class Pressure_Test_UI:
 
                 atm_input = values[0]
 
-                layout_confirmation_window = [[sg.Text('You entered: '+str(atm_input)+' kPa')],
+                layout_confirmation_window = [[sg.Text('You entered: '+str(atm_input)+' psi')],
                                                 [sg.Submit(), sg.Button('Re-Enter'),sg.Cancel()]]
                 confirmation_window= sg.Window('Confirm',  layout_confirmation_window)
                 event, values = confirmation_window.read()
@@ -549,7 +556,6 @@ class Pressure_Test_UI:
                 filename= sg.popup_get_file('file to open', no_window=True)
                 print(filename)
             elif event=='Run Test':
-                atm_input  = self.get_atmospheric_data_usr()
                 self.run_test_window()
             elif event=='Change test settings':
                 self.test_settings_window()
