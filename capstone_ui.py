@@ -424,8 +424,7 @@ class Pressure_Test_UI:
 
             atm_input = values[0]
 
-
-    def test_settings_window(self,):
+    def ret_test_settings_window(self,):
         settings_layout = [
                             [sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))],
                             [sg.Frame(layout=[
@@ -441,6 +440,11 @@ class Pressure_Test_UI:
                             )],
                             [sg.Button("Save",font=self._font+str(self._small_text_size), key='SAVE')]
                         ]
+        return settings_layout
+
+    def test_settings_window(self,):
+
+        settings_layout = ret_test_settings_window()
 
         test_settings_window = sg.Window("Test settings window", settings_layout)
 
@@ -449,11 +453,13 @@ class Pressure_Test_UI:
 
             if event=='TEST_DURATION':
                 change = sg.popup_get_text('Enter new value:')
-                self._test_duration = float(change)*60*100
-                test_settings_window.update('TEST_DURATION')
                 try:
                     self._test_duration = float(change)*60*100
-                    test_settings_window.update('TEST_DURATION')
+
+                    settings_layout = ret_test_settings_window()
+                    test_settings_window = sg.Window("Test settings window", settings_layout)
+
+                    test_settings_window.Refresh()
                 except:
                     sg.popup("Something went wrong\n Please try again")
 
@@ -461,6 +467,10 @@ class Pressure_Test_UI:
                 change = sg.popup_get_text('Enter new value:')
                 try:
                     self._leak_tolerance_psi = float(change)
+
+                    settings_layout = ret_test_settings_window()
+                    test_settings_window = sg.Window("Test settings window", settings_layout)
+
                     test_settings_window.update('MAX_DROP')
                 except:
                     sg.popup("Something went wrong\n Please try again")
@@ -469,6 +479,10 @@ class Pressure_Test_UI:
                 change = sg.popup_get_text('Enter new value:')
                 try:
                     self._pressure_low_bound = float(change)
+
+                    settings_layout = ret_test_settings_window()
+                    test_settings_window = sg.Window("Test settings window", settings_layout)
+
                     test_settings_window.update('MIN_PRESS')
                 except:
                     sg.popup("Something went wrong\n Please try again")
@@ -477,6 +491,10 @@ class Pressure_Test_UI:
                 change = sg.popup_get_text('Enter new value:')
                 try:
                     self._delta_time = float(change)
+
+                    settings_layout = ret_test_settings_window()
+                    test_settings_window = sg.Window("Test settings window", settings_layout)
+                    
                     test_settings_window.update('SAMP_RATE')
                 except:
                     sg.popup("Something went wrong\n Please try again")
