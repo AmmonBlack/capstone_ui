@@ -449,6 +449,8 @@ class Pressure_Test_UI:
 
             if event=='TEST_DURATION':
                 change = sg.popup_get_text('Enter new value:')
+                self._test_duration = float(change)*60*100
+                test_settings_window.update('TEST_DURATION')
                 try:
                     self._test_duration = float(change)*60*100
                     test_settings_window.update('TEST_DURATION')
