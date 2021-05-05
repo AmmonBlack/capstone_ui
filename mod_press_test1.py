@@ -387,13 +387,13 @@ def getSystemTemperature(d):
     return temperature_degrees_F, temperature_Kelvin
 
 def allowablePressureTest(pressure_Pa_1, pressure_psi_1, pressure_psi_n, temperature_Kelvin_1,
-                                  temperature_Kelvin_n, pressure_atm_Pa):
+                                  temperature_Kelvin_n, pressure_atm_Pa, tolerance=413.6854):
     '''This function uses the ideal gas law to calculate the pressure expected due to changing temperatures
     (allowable pressure).Then a tolerance value is subtracted from the allowable pressure to shift the allowable
     pressure values away from the actual values by the amount defined by the tolerance.'''
 
     #tolerance = 344.7379   # 0.05 psi, gives false leak indications during rapidly decreasing temps
-    tolerance = 413.6854   # 0.06 psi, This works the best for rapidly decreasing temps
+    #>>>>>>>>>tolerance = 413.6854   # 0.06 psi, This works the best for rapidly decreasing temps
     #tolerance = 482.633    # 0.07 psi
     #tolerance = 551.5806   # 0.08 psi
     #tolerance = 620.5281   # 0.09 psi
