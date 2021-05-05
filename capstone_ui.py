@@ -34,7 +34,7 @@ class Pressure_Test_UI:
         self._pressure_low_bound = 18  # The lower bound of acceptable pressure
         self._delta_time = 2
         try:
-            tmp = self.load('saved_settings.pck')
+            tmp = self.load('settings_save.pck')
 
             self._small_text_size = tmp._small_text_size
             self._large_text_size = tmp._large_text_size
@@ -288,9 +288,11 @@ class Pressure_Test_UI:
             event, values = test_window.read(timeout=10)
             if event is None:  # if user closes window
                 self.__clean_plot_data()
+                self.__clean_test_data()
                 break
             if event == "-EXIT-":
                 self.__clean_plot_data()
+                self.__clean_test_data()
                 break
             """
             if event == 'Reset':
@@ -352,7 +354,7 @@ class Pressure_Test_UI:
 
         test_window.close()
 
-    # This function will retrieve atmospheric data from the user
+    # This function will retrieve atmospheric data from the user<<< Not actually used in the code as of now.
     def get_atmospheric_data_usr(self):
         # Will insert getAmbientAirConditions() here with try.
         try:
@@ -397,6 +399,7 @@ class Pressure_Test_UI:
                      [sg.Button('OK')]]
             window_final_input = sg.Window('Test results', layout_atm_input)
             self.__clean_plot_data()
+            self.__clean_test_data()
 
             event, values = window_final_input.read()
             if event == 'OK':
@@ -499,7 +502,7 @@ class Pressure_Test_UI:
                 [sg.Menu(menu_def)],
                 [sg.Button('Run Test', font="Times 20", size=(30,1))],
                 [sg.Button('Change test settings',font="Times 20",)],
-                [sg.Button('Change viewing options',font="Times 20",)],
+                # [sg.Button('Change viewing options',font="Times 20",)],
                 [sg.Exit()]]
 
         window = sg.Window("INL Leak Test", layout, default_element_size=(100,1),
@@ -514,10 +517,12 @@ class Pressure_Test_UI:
             print('Button = ',event)
             # Process menu choices
             if event== 'About...':
-                sg.popup('About this program','Version 1.0', 'PysimpleGUI rocks...')
+                sg.popup('This is the capstone project designed for INL use by','David Foote', 'Easton Heaton', 'John Odland', ' and Ammon Black')
             elif event== 'Open':
                 filename= sg.popup_get_file('file to open', no_window=True)
                 print(filename)
             elif event=='Run Test':
                 atm_input  = self.get_atmospheric_data_usr()
                 self.run_test_window()
+            elif event=='Change test settings':
+                self.test_settings_window()
