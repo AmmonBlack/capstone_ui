@@ -428,13 +428,13 @@ class Pressure_Test_UI:
                             [sg.Text("This window allows modification of hard coded values", font=self._font+str(self._large_text_size))],
                             [sg.Frame(layout=[
                             [sg.Text("Test duration (min): "+str(self._test_duration/60/100), font=self._font+str(self._small_text_size)),
-                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='TEST_DURATION')]
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='TEST_DURATION')],
                             [sg.Text("Max pressure drop (psi): "+str(self._leak_tolerance_psi), font=self._font+str(self._small_text_size)),
-                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='MAX_DROP')]
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='MAX_DROP')],
                             [sg.Text("Minimum pressure (psi): "+str(self._pressure_low_bound), font=self._font+str(self._small_text_size)),
-                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='MIN_PRESS')]
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='MIN_PRESS')],
                             [sg.Text("Sampling rate (sec): "+str(self._delta_time), font=self._font+str(self._small_text_size)),
-                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='SAMP_RATE')]
+                                    sg.Button('Change', font=self._font+str(self._small_text_size), key='SAMP_RATE')],
                             ], title='Testing variables', relief=sg.RELIEF_SUNKEN, tooltip="Change test settings here"
                             )],
                             [sg.Button("Save",font=self._font+str(self._small_text_size, key='SAVE'))]
