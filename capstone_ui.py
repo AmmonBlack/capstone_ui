@@ -443,6 +443,8 @@ class Pressure_Test_UI:
                                         sg.Button('Change', font=self._font+str(self._small_text_size), key='MIN_PRESS')],
                                 [sg.Text("Sampling rate (sec): "+str(self._delta_time), font=self._font+str(self._small_text_size)),
                                         sg.Button('Change', font=self._font+str(self._small_text_size), key='SAMP_RATE')],
+                                [sg.Text("Test tolerance (psi): "+str(self._test_tolerance), font=self._font+str(self._small_text_size)),
+                                        sg.Button('Change', font=self._font+str(self._small_text_size), key='TOLERANCE')],
                                 ], title='Testing variables', relief=sg.RELIEF_SUNKEN, tooltip="Change test settings here"
                                 )],
                                 [sg.Button("Save",font=self._font+str(self._small_text_size), key='SAVE')]
@@ -504,6 +506,18 @@ class Pressure_Test_UI:
                     test_settings_window = sg.Window("Test settings window", settings_layout)
 
                     test_settings_window.update('SAMP_RATE')
+                except:
+                    sg.popup("Something went wrong\n Please try again")
+
+            if event=='TOLERANCE':
+                change = sg.popup_get_text('Enter new value:')
+                try:
+                    self._test_tolerance = float(change)
+
+                    settings_layout = ret_test_settings_window()
+                    test_settings_window = sg.Window("Test settings window", settings_layout)
+
+                    test_settings_window.Refresh()
                 except:
                     sg.popup("Something went wrong\n Please try again")
 
